@@ -1,0 +1,6 @@
+.git
+.devcontainer
+node_modules
+dist
+*.log
+*.pdf
