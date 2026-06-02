@@ -171,6 +171,17 @@ do_build() {
       exit 1
     fi
   else
+    # Fresh clones may not have node_modules yet; ensure local tsc is available.
+    if [[ ! -x "./node_modules/.bin/tsc" ]]; then
+      log "TypeScript compiler not found. Installing dependencies with npm ci..."
+      if npm ci --silent 2>&1; then
+        pass "Installed npm dependencies"
+      else
+        fail "npm ci failed — aborting"
+        exit 1
+      fi
+    fi
+
     log "Running tsc..."
     if npm run build --silent 2>&1; then
       pass "TypeScript compilation"
