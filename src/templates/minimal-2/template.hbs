@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Invoice {{invoice.number}}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Georgia', serif;
+      font-size: 13px;
+      color: #111;
+      background: #fff;
+      padding: 48px 56px 48px 86px;
+      position: relative;
+    }
+
+    /* ── Vertical template marker ── */
+    .template-marker {
+      position: absolute;
+      left: 22px;
+      top: 48px;
+      bottom: 48px;
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #9a9a9a;
+      display: flex;
+      align-items: center;
+    }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 48px;
+    }
+
+    .header h1 {
+      font-size: 13px;
+      font-weight: normal;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #555;
+    }
+
+    .header .invoice-id {
+      font-size: 13px;
+      color: #555;
+    }
+
+    /* ── Divider ── */
+    hr {
+      border: none;
+      border-top: 1px solid #ddd;
+      margin: 0 0 32px;
+    }
+
+    /* ── Parties ── */
+    .parties {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 40px;
+    }
+
+    .party h3 {
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .party p {
+      font-size: 12px;
+      color: #555;
+      line-height: 1.7;
+    }
+
+    .party .role {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #999;
+      margin-bottom: 6px;
+    }
+
+    .dates {
+      text-align: right;
+    }
+
+    .dates p {
+      font-size: 12px;
+      color: #555;
+      line-height: 1.7;
+    }
+
+    /* ── Items table ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 32px;
+    }
+
+    thead th {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #999;
+      font-weight: normal;
+      padding: 0 0 8px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+
+    thead th.right { text-align: right; }
+
+    tbody td {
+      padding: 10px 0;
+      font-size: 12px;
+      color: #333;
+      border-bottom: 1px solid #f0f0f0;
+      vertical-align: top;
+    }
+
+    tbody td.right { text-align: right; }
+
+    /* ── Totals ── */
+    .totals {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      margin-bottom: 40px;
+    }
+
+    .totals-row {
+      display: flex;
+      justify-content: space-between;
+      width: 240px;
+      padding: 4px 0;
+      font-size: 12px;
+      color: #555;
+    }
+
+    .totals-row.grand {
+      font-size: 14px;
+      font-weight: bold;
+      color: #111;
+      border-top: 1px solid #ddd;
+      margin-top: 6px;
+      padding-top: 10px;
+    }
+
+    /* ── Notes ── */
+    .notes {
+      font-size: 12px;
+      color: #777;
+      margin-bottom: 40px;
+      font-style: italic;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      font-size: 11px;
+      color: #bbb;
+      text-align: center;
+      letter-spacing: 0.5px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="template-marker">
+    Approved Invoice · {{layout}}{{#if templateVersion}} {{templateVersion}}{{else}} v1.0{{/if}}
+  </div>
+
+  <div class="header">
+    <h1>{{seller.name}}</h1>
+    <span class="invoice-id">{{invoice.number}}</span>
+  </div>
+
+  <hr />
+
+  <div class="parties">
+    <div class="party">
+      <div class="role">Bill To</div>
+      <h3>{{buyer.name}}</h3>
+      <p>{{buyer.address}}</p>
+      <p>{{buyer.city}}, {{buyer.country}}</p>
+      {{#if buyer.taxId}}<p>Tax ID: {{buyer.taxId}}</p>{{/if}}
+    </div>
+    <div class="dates">
+      <p>Issued: {{formatDate invoice.date}}</p>
+      <p>Due: {{formatDate invoice.dueDate}}</p>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Description</th>
+        <th class="right">Qty</th>
+        <th class="right">Unit Price</th>
+        <th class="right">VAT</th>
+        <th class="right">Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each items}}
+      <tr>
+        <td>{{description}}</td>
+        <td class="right">{{quantity}}</td>
+        <td class="right">{{formatMoney unitPrice ../currencySymbol}}</td>
+        <td class="right">{{vatRate}}%</td>
+        <td class="right">{{formatMoney lineTotalWithVat ../currencySymbol}}</td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <div class="totals">
+    <div class="totals-row">
+      <span>Subtotal</span>
+      <span>{{formatMoney totals.subtotal currencySymbol}}</span>
+    </div>
+    <div class="totals-row">
+      <span>VAT</span>
+      <span>{{formatMoney totals.totalVat currencySymbol}}</span>
+    </div>
+    <div class="totals-row grand">
+      <span>Total</span>
+      <span>{{formatMoney totals.grandTotal currencySymbol}}</span>
+    </div>
+  </div>
+
+  {{#if notes}}
+  <p class="notes">{{notes}}</p>
+  {{/if}}
+
+  <hr />
+
+  <div class="footer">{{seller.name}} · {{seller.address}}, {{seller.city}} · {{seller.country}}</div>
+
+</body>
+</html>

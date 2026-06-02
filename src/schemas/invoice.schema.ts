@@ -4,6 +4,7 @@ export const invoiceRequestSchema = {
   required: ['layout', 'invoice', 'seller', 'buyer', 'items', 'currency'],
   properties: {
     layout: { type: 'string', minLength: 1 },
+    templateVersion: { type: 'string', minLength: 1, maxLength: 32 },
     invoice: {
       type: 'object',
       required: ['number', 'date', 'dueDate'],

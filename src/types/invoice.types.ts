@@ -22,6 +22,7 @@ export interface InvoiceMeta {
 
 export interface InvoiceRequest {
   layout: string;
+  templateVersion?: string;
   invoice: InvoiceMeta;
   seller: InvoiceParty;
   buyer: InvoiceParty;

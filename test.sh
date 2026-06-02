@@ -3,13 +3,14 @@
 #   ./test.sh                        # build (tsc) and run all tests (local Node)
 #   ./test.sh --local                # same as above
 #   ./test.sh --docker               # build Docker image and run all tests (container)
-#   ./test.sh --preview <layout>     # generate a sample PDF and open it
+#   ./test.sh --preview <layout> [templateVersion]  # generate a sample PDF and open it
 #   ./test.sh --help
 set -euo pipefail
 
 # ── Mode + args ───────────────────────────────────────────────────────────────
 MODE="local"
 PREVIEW_LAYOUT=""
+PREVIEW_VERSION=""
 
 case "${1:-}" in
   --docker)  MODE="docker" ;;
@@ -17,21 +18,25 @@ case "${1:-}" in
   --preview)
     MODE="preview"
     PREVIEW_LAYOUT="${2:-}"
+    PREVIEW_VERSION="${3:-v1.0}"
     if [[ -z "$PREVIEW_LAYOUT" ]]; then
-      echo "Usage: $0 --preview <layout>"
+      echo "Usage: $0 --preview <layout> [templateVersion]"
       echo "  Available layouts are discovered at runtime."
       echo "  Example: $0 --preview standard"
+      echo "  Example: $0 --preview minimal-2 v2.7"
       exit 1
     fi
     ;;
   --help|-h)
-    echo "Usage: $0 [--local|--docker|--preview <layout>]"
+    echo "Usage: $0 [--local|--docker|--preview <layout> [templateVersion]]"
     echo "  --local              Build with tsc and run all tests (default)"
     echo "  --docker             Build a Docker image and run all tests"
-    echo "  --preview <layout>   Generate a sample PDF for the given layout and open it"
+    echo "  --preview <layout> [templateVersion]"
+    echo "                       Generate a sample PDF for the given layout and open it"
+    echo "                       templateVersion defaults to v1.0"
     exit 0
     ;;
-  *) echo "Unknown option: $1  (use --local, --docker, or --preview <layout>)"; exit 1 ;;
+  *) echo "Unknown option: $1  (use --local, --docker, or --preview <layout> [templateVersion])"; exit 1 ;;
 esac
 
 # ── Config ────────────────────────────────────────────────────────────────────
@@ -244,6 +249,7 @@ do_preview() {
   do_start_server
 
   section "Preview — ${PREVIEW_LAYOUT} layout"
+  log "Using template version: ${PREVIEW_VERSION}"
 
   # Verify the requested layout exists before generating
   LAYOUTS=$(curl -sf "${BASE_URL}/invoice/layouts")
@@ -261,6 +267,7 @@ do_preview() {
     -w "%{http_code}" \
     -d "{
       \"layout\": \"${PREVIEW_LAYOUT}\",
+      \"templateVersion\": \"${PREVIEW_VERSION}\",
       \"invoice\": {
         \"number\": \"PREVIEW-001\",
         \"date\": \"$(date +%Y-%m-%d)\",

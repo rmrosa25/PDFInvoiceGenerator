@@ -123,6 +123,7 @@ InvoiceRequest (from HTTP body)
   ▼
 InvoiceRenderData
   ├── layout: string
+  ├── templateVersion?: string
   ├── invoice: { number, date, dueDate }
   ├── seller: InvoiceParty
   ├── buyer: InvoiceParty

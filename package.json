@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon --watch src --ext ts --exec ts-node src/index.ts",
-    "build": "tsc && cp -r src/templates dist/templates",
+    "build": "tsc && rm -rf dist/templates && mkdir -p dist/templates && cp -R src/templates/. dist/templates",
     "start": "node dist/index.js",
     "test": "bash test.sh"
   },

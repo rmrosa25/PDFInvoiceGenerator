@@ -34,7 +34,10 @@ A layout is recognised if and only if its folder contains a file named exactly `
 
    ```bash
    ./test.sh --preview detailed
+  ./test.sh --preview detailed v2.0
    ```
+
+  The optional second value is sent as `templateVersion` in the request body.
 
 No other files need to change.
 
@@ -102,9 +105,16 @@ The following variables are available in every template. All monetary values are
 | Variable | Type | Description |
 |---|---|---|
 | `layout` | `string` | Name of the current layout |
+| `templateVersion` | `string \| undefined` | Optional version label passed by request |
 | `currency` | `string` | ISO currency code, e.g. `EUR` |
 | `currencySymbol` | `string` | Resolved symbol, e.g. `€` |
 | `notes` | `string \| undefined` | Optional free-text notes |
+
+Example for dynamic template labels:
+
+```handlebars
+{{layout}}{{#if templateVersion}} {{templateVersion}}{{/if}}
+```
 
 ### `invoice`
 

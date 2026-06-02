@@ -24,7 +24,8 @@ Accepts invoice data, returns a PDF binary (`application/pdf`).
 
 ```json
 {
-  "layout": "standard",
+  "layout": "minimal-2",
+  "templateVersion": "v2.3",
   "invoice": {
     "number": "INV-2026-001",
     "date": "2026-05-07",
@@ -60,7 +61,7 @@ Accepts invoice data, returns a PDF binary (`application/pdf`).
 
 **Required fields:** `layout`, `invoice` (number, date, dueDate), `seller` (name, address, city, country), `buyer` (name, address, city, country), `items` (min 1), `currency` (3-letter ISO code).
 
-**Optional fields:** `seller.taxId`, `seller.email`, `buyer.taxId`, `buyer.email`, `notes`.
+**Optional fields:** `templateVersion`, `seller.taxId`, `seller.email`, `buyer.taxId`, `buyer.email`, `notes`.
 
 **Response:** `application/pdf` binary with `Content-Disposition: attachment; filename="invoice-<number>.pdf"`.
 
@@ -70,10 +71,10 @@ Subtotals, VAT amounts, and grand total are always computed server-side from the
 
 ### `GET /invoice/layouts`
 
-Returns the list of available layout names.
+Returns the list of available layout names discovered from `src/templates/*/template.hbs`.
 
 ```json
-{ "layouts": ["minimal", "standard"] }
+{ "layouts": ["minimal", "minimal-2", "standard"] }
 ```
 
 ---
@@ -86,13 +87,13 @@ The test script builds the project, starts the server, runs all test cases, and 
 ./test.sh                      # build (tsc) + run tests against a local Node process
 ./test.sh --local              # same as above
 ./test.sh --docker             # build Docker image + run tests against a container
-./test.sh --preview <layout>   # generate a sample PDF and open it
+./test.sh --preview <layout> [templateVersion]   # generate a sample PDF and open it
 ./test.sh --help
 ```
 
 ### `--local` (default)
 
-Compiles TypeScript with `tsc`, starts `node dist/index.js`, runs 19 test cases, then stops the server.
+Ensures local dependencies exist (runs `npm ci` when local `tsc` is missing), compiles TypeScript, starts `node dist/index.js`, runs 19 test cases, then stops the server.
 
 ```bash
 ./test.sh
@@ -114,13 +115,16 @@ brew install colima docker
 colima start
 ```
 
-### `--preview <layout>`
+### `--preview <layout> [templateVersion]`
 
 Generates a sample invoice PDF for the given layout and opens it with the system viewer. The file is saved to `invoice-preview-<layout>.pdf` in the project root.
+
+`templateVersion` is optional and defaults to `v1.0`. It is passed to the API request body as `templateVersion`, so templates can print a dynamic version label.
 
 ```bash
 ./test.sh --preview standard
 ./test.sh --preview minimal
+./test.sh --preview minimal-2 v2.7
 ```
 
 If the layout name doesn't exist, the script exits with an error and lists the available options.
